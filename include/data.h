@@ -2,6 +2,7 @@
 
 #include <Preferences.h>
 #include <M5StickCPlus2.h>
+#include <ArduinoJson.h>
 
 class Storage
 {
@@ -30,6 +31,9 @@ public:
 
     unsigned long get_dim_delay();
     void set_dim_delay(unsigned long delay);
+
+    JsonDocument get_json();
+    void set_json(JsonDocument doc);
 
 private:
     bool started = false;

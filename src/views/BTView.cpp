@@ -233,7 +233,6 @@ void BTView::bt_loop()
             if (storage.get_beep())
             {
                 text = "Beep enabled\n";
-                M5.Speaker.tone(10000, 100);
                 write_to_bt(text.c_str());
                 text = get_main_text();
             }

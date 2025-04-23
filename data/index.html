@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WiFi Settings</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #f0f2f5;
+        padding: 2rem;
+      }
+      .container {
+        max-width: 500px;
+        margin: auto;
+        background: #fff;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      h2 {
+        text-align: center;
+        margin-bottom: 1rem;
+      }
+      label {
+        display: flex;
+        flex-grow: 1;
+        margin: 1rem 0 0.5rem;
+      }
+      select,
+      input[type="text"],
+      input[type="password"] {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-sizing: border-box;
+      }
+      .toggle-button {
+        display: flex;
+        align-items: center;
+        margin-top: 1rem;
+      }
+      .switch {
+        position: relative;
+        display: inline-block;
+        max-width: 50px;
+        height: 28px;
+        margin-left: 1rem;
+      }
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: 0.4s;
+        border-radius: 28px;
+      }
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 22px;
+        width: 22px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: 0.4s;
+        border-radius: 50%;
+      }
+      input:checked + .slider {
+        background-color: #4caf50;
+      }
+      input:checked + .slider:before {
+        transform: translateX(22px);
+      }
+      .save-button {
+        display: block;
+        width: 100%;
+        margin-top: 2rem;
+        padding: 0.75rem;
+        background: #007bff;
+        color: white;
+        font-size: 1rem;
+        font-weight: bold;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+        box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+      }
+      .save-button:hover {
+        background: #0056b3;
+      }
+      input[type="range"] {
+        width: 100%;
+        margin: 1rem 0;
+        accent-color: #007bff;
+      }
+      #sliderValue {
+        display: inline-block;
+        font-weight: bold;
+        margin-left: 0.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>WiFi Configuration</h2>
+
+      <div id="network-selection" hidden>
+        <label for="network-dropdown">Choose Network:</label>
+        <select id="network-dropdown">
+          <option value="" disabled selected>Select a network</option>
+        </select>
+      </div>
+
+      <label for="ssid">SSID:</label>
+      <input type="text" id="ssid" placeholder="Enter SSID" />
+
+      <label for="password">Password:</label>
+      <input type="password" id="password" placeholder="Enter Password" />
+
+      <div class="toggle-button">
+        <label for="beep-toggle">Beep:</label>
+        <label class="switch">
+          <input type="checkbox" id="beep-toggle" />
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="toggle-button">
+        <label for="dim-toggle">Dimming:</label>
+        <label class="switch">
+          <input type="checkbox" id="dim-toggle" />
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div id="option-dimming-delay">
+        <label for="dimming-delay">Dimming Delay (seconds):</label>
+        <select id="dimming-delay">
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="15">15</option>
+          <option value="30">30</option>
+          <option value="60">60</option>
+        </select>
+      </div>
+      <div id="option-sleep-delay">
+        <label for="sleep-delay">Sleep Delay (seconds):</label>
+        <select id="sleep-delay">
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="15">15</option>
+          <option value="30">30</option>
+          <option value="60">60</option>
+        </select>
+      </div>
+
+      <label for="brightness-slider">Set Brightness (10-100):</label>
+      <input
+        type="range"
+        id="brightness-slider"
+        min="10"
+        max="100"
+        step="10"
+        value="10"
+        oninput="sliderValue.textContent = this.value"
+      />
+      <span id="sliderValue">10</span>
+
+      <button class="save-button" id="save-button">Save Settings</button>
+    </div>
+
+    <script>
+      function rssi_to_signal_strength(rssi) {
+        if (rssi >= -50) return 100;
+        if (rssi >= -60) return 80;
+        if (rssi >= -70) return 60;
+        if (rssi >= -80) return 40;
+        if (rssi >= -90) return 20;
+        return 0;
+      }
+
+      function enum_to_security(security) {
+        switch (security) {
+          case 0:
+            return "Open";
+          case 1:
+            return "WEP";
+          case 2:
+            return "WPA-PSK";
+          case 3:
+            return "WPA2-PSK";
+          case 4:
+            return "WPA/WPA2-PSK";
+          default:
+            return "Unknown";
+        }
+      }
+
+      fetch("/settings")
+        .then((response) => response.json())
+        .then((data) => {
+          document.getElementById("ssid").value = data.wifi_ssid;
+          document.getElementById("password").value = data.wifi_password;
+          document.getElementById("beep-toggle").checked = data.beep;
+          document.getElementById("dim-toggle").checked = data.imu;
+          document.getElementById("brightness-slider").value = data.brightness;
+          document.getElementById("sliderValue").textContent = data.brightness;
+
+          if (data.dimming) {
+            document.getElementById("option-dimming-delay").hidden = false;
+            document.getElementById("option-sleep-delay").hidden = false;
+          } else {
+            document.getElementById("option-dimming-delay").hidden = true;
+            document.getElementById("option-sleep-delay").hidden = true;
+          }
+
+          document.getElementById("dimming-delay").value =
+            data.dim_delay / 1000;
+          document.getElementById("sleep-delay").value =
+            data.sleep_delay / 1000;
+        });
+
+      fetch("/networks")
+        .then((response) => response.json())
+        .then((networks) => {
+          const dropdown = document.getElementById("network-dropdown");
+          networks.forEach((network) => {
+            const option = document.createElement("option");
+            option.value = network.ssid;
+            option.textContent = `${network.ssid} (${rssi_to_signal_strength(
+              network.rssi
+            )}%/${enum_to_security(network.encryption)})`;
+            dropdown.appendChild(option);
+          });
+          if (networks.length > 0) {
+            document.getElementById("network-selection").hidden = false;
+          } else {
+            document.getElementById("network-selection").hidden = true;
+          }
+        });
+
+      const dropdown = document.getElementById("network-dropdown");
+      const ssidInput = document.getElementById("ssid");
+      const passwordInput = document.getElementById("password");
+      const toggleDimming = document.getElementById("dim-toggle");
+      const sliderValue = document.getElementById("sliderValue");
+      const button = document.getElementById("save-button");
+
+      toggleDimming.addEventListener("change", function () {
+        const dimmingDelay = document.getElementById("option-dimming-delay");
+        const sleepDelay = document.getElementById("option-sleep-delay");
+        if (this.checked) {
+          dimmingDelay.hidden = false;
+          sleepDelay.hidden = false;
+        } else {
+          dimmingDelay.hidden = true;
+          sleepDelay.hidden = true;
+        }
+      });
+
+      dropdown.addEventListener("change", function () {
+        ssidInput.value = this.value;
+        passwordInput.value = "";
+      });
+
+      button.addEventListener("click", function () {
+        const ssid = ssidInput.value;
+        const password = document.getElementById("password").value;
+        const beep = document.getElementById("beep-toggle").checked;
+        const dimming = document.getElementById("dim-toggle").checked;
+        const dimmingDelay = document.getElementById("dimming-delay").value;
+        const sleepDelay = document.getElementById("sleep-delay").value;
+        const brightness = document.getElementById("brightness-slider").value;
+        const brightnessValue = parseInt(brightness, 10);
+
+        const data = {
+          wifi_ssid: ssid,
+          wifi_password: password,
+          beep: beep,
+          imu: dimming,
+          dim_delay: dimmingDelay * 1000,
+          sleep_delay: sleepDelay * 1000,
+          brightness: brightnessValue,
+        };
+
+        fetch("/settings", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        })
+          .then((response) => response.json())
+          .then((result) => {
+            if (result.success) {
+              alert("Settings saved successfully!");
+            } else {
+              alert("Failed to save settings.");
+            }
+          });
+      });
+    </script>
+  </body>
+</html>

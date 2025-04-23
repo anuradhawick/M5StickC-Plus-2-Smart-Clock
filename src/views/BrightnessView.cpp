@@ -88,7 +88,6 @@ bool BrightnessView::receive_event(EVENTS::event event)
         {
             brightness = 10;
         }
-        M5.Display.setBrightness(brightness);
         storage.set_brightness(brightness);
         return true;
     case EVENTS::POWER_PRESSED:
@@ -98,7 +97,6 @@ bool BrightnessView::receive_event(EVENTS::event event)
         {
             brightness = 100;
         }
-        M5.Display.setBrightness(brightness);
         storage.set_brightness(brightness);
         return true;
     default:

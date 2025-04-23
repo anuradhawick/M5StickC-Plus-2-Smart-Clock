@@ -5,6 +5,7 @@
 #include "views/AnalogClock.h"
 #include "views/BrightnessView.h"
 #include "views/WiFiView.h"
+#include "views/APView.h"
 #include "tasks.h"
 #include "util.h"
 #include "data.h"
@@ -15,19 +16,17 @@ View *active_view;
 uint8_t state = 1;
 unsigned long active_time;
 
-void event_loop(bool change_state = false);
 bool change_stage();
 
 void setup()
 {
     m5::M5Unified::config_t cfg = M5.config();
     cfg.serial_baudrate = 115200;
-    // cfg.fallback_board = m5::board_t::board_M5StickCPlus2;
     StickCP2.begin(cfg);
     storage.init();
     StickCP2.Display.setRotation(3);
     StickCP2.Display.setSwapBytes(true);
-    StickCP2.Display.setBrightness(storage.get_brightness());
+    storage.set_brightness(storage.get_brightness());
 
     active_view = new AnalogClock();
     active_time = millis();
@@ -40,18 +39,19 @@ void loop()
     active_view->render();
 
     // no dimming as long as in shake
-    // if (storage.get_imu())
-    // {
-    //     dimmer.tick();
+    if (storage.get_imu())
+    {
+        dimmer.tick();
 
-    //     if (imumgr.is_moved()) {
-    //         dimmer.interrup();
-    //     }
-    // }
-    // else
-    // {
-    //     dimmer.interrup();
-    // }
+        if (imumgr.is_moved())
+        {
+            dimmer.interrup();
+        }
+    }
+    else
+    {
+        dimmer.interrup();
+    }
 
     // capture events
     // Lower button
@@ -93,7 +93,7 @@ bool change_stage()
 {
     state++;
 
-    if (state > 5)
+    if (state > 6)
     {
         state = 1;
     }
@@ -118,7 +118,9 @@ bool change_stage()
     case 5:
         active_view = new WiFiView();
         break;
-
+    case 6:
+        active_view = new APView();
+        break;
     default:
         break;
     }

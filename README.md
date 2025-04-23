@@ -1,4 +1,4 @@
-# M5StickC-Plus-SmartClock
+# M5StickC-Plus-2-SmartClock
 
 The **M5StickC-Plus-SmartClock** project is designed for the M5StickC Plus, a compact IoT development board. This project transforms the device into a smart clock with features such as Wi-Fi connectivity and real-time date/time updates. It leverages the PlatformIO ecosystem for easy development and deployment, making it accessible for both beginners and experienced developers.
 

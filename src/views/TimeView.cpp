@@ -3,9 +3,6 @@
 #include "views/TimeView.h"
 
 static const char *TAG = "TIME_VIEW";
-
-extern m5::rtc_time_t RTC_TimeStruct;
-extern m5::rtc_date_t RTC_DateStruct;
 extern String days[7];
 
 TimeView::TimeView()
@@ -35,26 +32,28 @@ TimeView::~TimeView()
 
 void TimeView::render()
 {
-    StickCP2.Rtc.getTime(&RTC_TimeStruct);
-    StickCP2.Rtc.getDate(&RTC_DateStruct);
+    m5::rtc_time_t timeStruct;
+    m5::rtc_date_t dateStruct;
+    StickCP2.Rtc.getTime(&timeStruct);
+    StickCP2.Rtc.getDate(&dateStruct);
     disp_buffer->setCursor(0, 15);
     disp_buffer->setTextFont(0);
     disp_buffer->setFont(&DSEG7_Classic_Regular_64);
 
     // if time has changed
-    if (h_cache != RTC_TimeStruct.hours || m_cache != RTC_TimeStruct.minutes)
+    if (h_cache != timeStruct.hours || m_cache != timeStruct.minutes)
     {
-        h_cache = RTC_TimeStruct.hours;
-        m_cache = RTC_TimeStruct.minutes;
+        h_cache = timeStruct.hours;
+        m_cache = timeStruct.minutes;
         sprintf(timeHHMM, "%02d:%02d", h_cache, m_cache);
         ESP_LOGD(TAG, "Updating time to - %s", timeHHMM);
         disp_buffer->drawString(timeHHMM, 5, 60);
     }
 
     // if seconds has changed
-    if (s_cache != RTC_TimeStruct.seconds)
+    if (s_cache != timeStruct.seconds)
     {
-        s_cache = RTC_TimeStruct.seconds;
+        s_cache = timeStruct.seconds;
         sprintf(seconds, "%02d", s_cache);
         ESP_LOGD(TAG, "Updating seconds to - %s", seconds);
         disp_buffer->setFont(&DSEG7_Classic_Bold_30);
@@ -62,19 +61,19 @@ void TimeView::render()
     }
 
     // if day has changed
-    if (d_cache != RTC_DateStruct.weekDay)
+    if (d_cache != dateStruct.weekDay)
     {
-        d_cache = RTC_DateStruct.weekDay;
+        d_cache = dateStruct.weekDay;
         sprintf(day, "%-10s", days[d_cache].c_str());
         disp_buffer->drawString(day, 10, 5, &fonts::Font4);
     }
 
     // update date if its changed
-    if (dt_cache != RTC_DateStruct.date || mn_cache != RTC_DateStruct.month || yr_cache != RTC_DateStruct.year)
+    if (dt_cache != dateStruct.date || mn_cache != dateStruct.month || yr_cache != dateStruct.year)
     {
-        dt_cache = RTC_DateStruct.date;
-        mn_cache = RTC_DateStruct.month;
-        yr_cache = RTC_DateStruct.year;
+        dt_cache = dateStruct.date;
+        mn_cache = dateStruct.month;
+        yr_cache = dateStruct.year;
         disp_buffer->setTextColor(grey, TFT_BLACK);
         disp_buffer->drawString(String(dt_cache) + "/" + String(mn_cache), 10, 30, &fonts::Font4);
         disp_buffer->drawString(String(yr_cache), 70, 35, &fonts::Font2);
