@@ -4,5 +4,5 @@
 
 bool connect_to_wifi(String wifi_ssid, String wifi_pass);
 bool disconnect_wifi();
-bool update_time_date();
+bool update_time_date(long gmtOffset_sec, int daylightOffset_sec);
 int8_t get_batt_percentage();

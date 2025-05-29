@@ -5,8 +5,6 @@ static const char *TAG = "WIFI";
 
 // Time
 const char *ntpServer = "pool.ntp.org";
-const long gmtOffset_sec = 9 * 3600 + 1800; // ACST = UTC+9:30 (34200 sec)
-const int daylightOffset_sec = 0;
 
 bool connect_to_wifi(String wifi_ssid, String wifi_pass)
 {
@@ -43,7 +41,7 @@ bool disconnect_wifi()
     return false;
 }
 
-bool update_time_date()
+bool update_time_date(long gmtOffset_sec, int daylightOffset_sec)
 {
     configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
     struct tm timeinfo;
@@ -68,7 +66,9 @@ bool update_time_date()
     StickCP2.Rtc.setTime(&timeStruct);
     StickCP2.Rtc.setDate(&dateStruct);
 
-    ESP_LOGI(TAG, "Year: %d Month: %d Day: %d", dateStruct.year, dateStruct.month, dateStruct.date);
+    ESP_LOGD(TAG, "Year: %d Month: %d Day: %d", dateStruct.year, dateStruct.month, dateStruct.date);
+    ESP_LOGD(TAG, "Hour: %d Minute: %d Second: %d", timeStruct.hours, timeStruct.minutes, timeStruct.seconds);
+    ESP_LOGD(TAG, "Weekday: %d", dateStruct.weekDay);
 
     return true;
 }

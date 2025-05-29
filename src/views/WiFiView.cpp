@@ -145,7 +145,7 @@ void WiFiView::render()
 
     else if (wifi_started == 1 && inited_time + 2000 < millis())
     {
-        if (update_time_date())
+        if (update_time_date(storage.get_gmt_offset_sec(), storage.get_daylight_offset_sec()))
         {
             wifi_started = 3;
         }

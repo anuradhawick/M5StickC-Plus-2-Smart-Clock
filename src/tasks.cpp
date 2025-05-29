@@ -11,7 +11,7 @@ Dimmer::Dimmer()
 
 bool Dimmer::tick()
 {
-    ESP_LOGD(TAG, "Tick %d", status);
+    // ESP_LOGD(TAG, "Tick %d", status);
     if (status == 0 && init_time + storage.get_dim_delay() < millis())
     {
         // Go dim

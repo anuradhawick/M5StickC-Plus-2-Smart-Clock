@@ -177,6 +177,53 @@
       />
       <span id="sliderValue">10</span>
 
+      <!-- Time Zone Dropdown -->
+      <label for="timezone-select">Time Zone:</label>
+      <select id="timezone-select">
+        <option value="" disabled selected>Select your time zone</option>
+        <!-- Australia Eastern Standard Time (AEST, UTC+10:00) -->
+        <option value='{"gmtOffset_sec":36000,"daylightOffset_sec":0}'>
+          Australia Eastern Standard Time (AEST, UTC+10:00)
+        </option>
+        <!-- Australia Eastern Daylight Time (AEDT, UTC+11:00) -->
+        <option value='{"gmtOffset_sec":36000,"daylightOffset_sec":3600}'>
+          Australia Eastern Daylight Time (AEDT, UTC+11:00)
+        </option>
+        <!-- Australia Central Standard Time (ACST, UTC+9:30) -->
+        <option value='{"gmtOffset_sec":34200,"daylightOffset_sec":0}'>
+          Australia Central Standard Time (ACST, UTC+9:30)
+        </option>
+        <!-- Australia Central Daylight Time (ACDT, UTC+10:30) -->
+        <option value='{"gmtOffset_sec":34200,"daylightOffset_sec":3600}'>
+          Australia Central Daylight Time (ACDT, UTC+10:30)
+        </option>
+        <!-- Australia Western Standard Time (AWST, UTC+8:00) -->
+        <option value='{"gmtOffset_sec":28800,"daylightOffset_sec":0}'>
+          Australia Western Standard Time (AWST, UTC+8:00)
+        </option>
+        <!-- Australia Lord Howe Standard Time (LHST, UTC+10:30) -->
+        <option value='{"gmtOffset_sec":37800,"daylightOffset_sec":0}'>
+          Australia Lord Howe Standard Time (LHST, UTC+10:30)
+        </option>
+        <!-- Australia Lord Howe Daylight Time (LHDT, UTC+11:00) -->
+        <option value='{"gmtOffset_sec":37800,"daylightOffset_sec":1800}'>
+          Australia Lord Howe Daylight Time (LHDT, UTC+11:00)
+        </option>
+        <!-- Australia Darwin (ACST, UTC+9:30, no DST) -->
+        <option value='{"gmtOffset_sec":34200,"daylightOffset_sec":0}'>
+          Australia Darwin (ACST, UTC+9:30, no DST)
+        </option>
+        <!-- Australia Brisbane (AEST, UTC+10:00, no DST) -->
+        <option value='{"gmtOffset_sec":36000,"daylightOffset_sec":0}'>
+          Australia Brisbane (AEST, UTC+10:00, no DST)
+        </option>
+        <!-- Sri Lanka Standard Time (UTC+5:30) -->
+        <option value='{"gmtOffset_sec":19800,"daylightOffset_sec":0}'>
+          Sri Lanka Standard Time (UTC+5:30)
+        </option>
+      </select>
+      <!-- End Time Zone Dropdown -->
+
       <button class="save-button" id="save-button">Save Settings</button>
     </div>
 
@@ -216,6 +263,9 @@
           document.getElementById("dim-toggle").checked = data.imu;
           document.getElementById("brightness-slider").value = data.brightness;
           document.getElementById("sliderValue").textContent = data.brightness;
+          document.getElementById(
+            "timezone-select"
+          ).value = `{"gmtOffset_sec":${data.gmt_offset},"daylightOffset_sec":${data.daylight_offset}}`;
 
           if (data.dimming) {
             document.getElementById("option-dimming-delay").hidden = false;
@@ -283,6 +333,14 @@
         const sleepDelay = document.getElementById("sleep-delay").value;
         const brightness = document.getElementById("brightness-slider").value;
         const brightnessValue = parseInt(brightness, 10);
+        const tzData = JSON.parse(
+          document.getElementById("timezone-select").value ||
+            '{"gmtOffset_sec":19800,"daylightOffset_sec":0}'
+        );
+        const gmtOffset = tzData["gmtOffset_sec"];
+        const daylightOffset = tzData["daylightOffset_sec"];
+
+        console.log(tzData);
 
         const data = {
           wifi_ssid: ssid,
@@ -292,6 +350,8 @@
           dim_delay: dimmingDelay * 1000,
           sleep_delay: sleepDelay * 1000,
           brightness: brightnessValue,
+          gmt_offset: gmtOffset,
+          daylight_offset: daylightOffset,
         };
 
         fetch("/settings", {

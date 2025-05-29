@@ -32,6 +32,12 @@ public:
     unsigned long get_dim_delay();
     void set_dim_delay(unsigned long delay);
 
+    long get_gmt_offset_sec();
+    void set_gmt_offset_sec(long offset);
+    
+    int get_daylight_offset_sec();
+    void set_daylight_offset_sec(int offset);
+
     JsonDocument get_json();
     void set_json(JsonDocument doc);
 

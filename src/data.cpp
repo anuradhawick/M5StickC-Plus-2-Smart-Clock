@@ -39,7 +39,7 @@ uint8_t Storage::get_brightness()
 {
     uint8_t brightness = prefs.getUChar("brightness");
     ESP_LOGD(TAG, "Brightness read from preferences: %d", brightness);
-    if (brightness < 30 || brightness > 255)
+    if (brightness < 10 || brightness > 100)
     {
         prefs.putUChar("brightness", 50);
         return 50;
@@ -130,6 +130,32 @@ void Storage::set_dim_delay(unsigned long delay)
     ESP_LOGD(TAG, "Dim delay saved to preferences: %lu", delay);
 }
 
+long Storage::get_gmt_offset_sec()
+{
+    long gmt_offset = prefs.getULong("gmt_offset", 0);
+    ESP_LOGD(TAG, "GMT offset read from preferences: %ld", gmt_offset);
+    return gmt_offset;
+}
+
+void Storage::set_gmt_offset_sec(long offset)
+{
+    prefs.putULong("gmt_offset", offset);
+    ESP_LOGD(TAG, "GMT offset saved to preferences: %ld", offset);
+}
+
+int Storage::get_daylight_offset_sec()
+{
+    int daylight_offset = prefs.getInt("daylight_offset", 0);
+    ESP_LOGD(TAG, "Daylight offset read from preferences: %d", daylight_offset);
+    return daylight_offset;
+}
+
+void Storage::set_daylight_offset_sec(int offset)
+{
+    prefs.putInt("daylight_offset", offset);
+    ESP_LOGD(TAG, "Daylight offset saved to preferences: %d", offset);
+}
+
 JsonDocument Storage::get_json()
 {
     JsonDocument doc;
@@ -140,6 +166,9 @@ JsonDocument Storage::get_json()
     doc["imu"] = get_imu();
     doc["sleep_delay"] = get_sleep_delay();
     doc["dim_delay"] = get_dim_delay();
+    doc["gmt_offset"] = get_gmt_offset_sec();
+    doc["daylight_offset"] = get_daylight_offset_sec();
+    ESP_LOGI(TAG, "JSON document created with current settings %s", doc.as<String>().c_str());
     return doc;
 }
 
@@ -152,6 +181,9 @@ void Storage::set_json(JsonDocument doc)
     set_imu(doc["imu"]);
     set_sleep_delay(doc["sleep_delay"]);
     set_dim_delay(doc["dim_delay"]);
+    set_gmt_offset_sec(doc["gmt_offset"]);
+    set_daylight_offset_sec(doc["daylight_offset"]);
+    ESP_LOGI(TAG, "Settings updated from JSON document: %s", doc.as<String>().c_str());
 }
 
 Storage storage;
